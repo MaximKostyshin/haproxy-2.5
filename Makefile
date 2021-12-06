@@ -881,6 +881,7 @@ OBJS += $(EXTRA_OBJS)
 endif
 
 OBJS += src/mux_h2.o src/mux_fcgi.o src/http_ana.o src/mux_h1.o               \
+        src/flt_placemark.o \
         src/tcpcheck.o src/stream.o src/stats.o src/server.o src/flt_spoe.o   \
         src/stick_table.o src/tools.o src/sample.o src/log.o src/peers.o      \
         src/resolvers.o src/backend.o src/cfgparse.o src/http_htx.o src/cli.o \
