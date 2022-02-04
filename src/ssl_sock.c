@@ -5773,6 +5773,15 @@ static int ssl_sock_handshake(struct connection *conn, unsigned int flag)
 		goto reneg_ok;
 	}
 	ret = SSL_do_handshake(ctx->ssl);
+
+//        fprintf(stderr, "%s\n", SSL_state_string_long(ctx->ssl)); // AvHaproxy
+        OSSL_HANDSHAKE_STATE handshake_status = TLS_ST_OK; //TLS_ST_SW_SRVR_DONE - not use;
+	if (ctx->ssl && SSL_ems_string_long(ctx->ssl, 0, handshake_status) != NULL) { // AvHaproxy works only for TLS 1.2
+	 fprintf(stderr, "fd[%#x] OpenSSL %s\n", conn->handle.fd, SSL_ems_string_long(ctx->ssl, 0, handshake_status));
+	 fprintf(stderr, "fd[%#x] OpenSSL %s\n", conn->handle.fd, SSL_ems_string_long(ctx->ssl, 1, handshake_status));
+	 fprintf(stderr, "fd[%#x] OpenSSL %s\n", conn->handle.fd, SSL_ems_string_long(ctx->ssl, 2, handshake_status));
+	}
+
 check_error:
 	if (ret != 1) {
 		/* handshake did not complete, let's find why */
