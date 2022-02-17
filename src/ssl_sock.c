@@ -641,6 +641,15 @@ int ssl_init_single_engine(const char *engine_id, const char *def_algorithms)
 		goto fail_set_method;
 	}
 
+	// Setting randomness from engine by default, if there is a randomness
+	const RAND_METHOD *tmp_meth = NULL;
+	if ((tmp_meth = ENGINE_get_RAND(engine)) != NULL) { 
+		if (RAND_set_rand_method(tmp_meth) == 0) {
+			ha_alert("ssl-engine %s: failed on RAND_set_rand_method\n", engine_id);
+			goto fail_set_method;
+		}
+	}
+
 	el = calloc(1, sizeof(*el));
 	if (!el)
 		goto fail_alloc;
@@ -7654,6 +7663,11 @@ static void __ssl_sock_init(void)
 
 	xprt_register(XPRT_SSL, &ssl_sock);
 #if HA_OPENSSL_VERSION_NUMBER < 0x10100000L
+	// Loading all engines for openssl version 1.0.2 
+	// (the ssl-engine parameter for the global section of the haproxy.cfg file does not work)
+	OPENSSL_config(NULL);
+	OpenSSL_add_all_algorithms();
+
 	SSL_library_init();
 #endif
 #if (!defined(OPENSSL_NO_COMP) && !defined(SSL_OP_NO_COMPRESSION))
